@@ -445,7 +445,6 @@ async function sendMessage() {
         const data = await response.json();
         let bienReply = "Pasensya na paps, medyo naguluhan ako. Paki-ulit?";
         
-        // Correct way to get text from Groq/OpenAI response
         if (data.choices && data.choices[0].message) {
             bienReply = data.choices[0].message.content;
         } else if (data.error) {
