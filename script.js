@@ -421,22 +421,32 @@ async function sendMessage() {
     scrollToBottom();
 
     try {
-        const response = await fetch("https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=AIzaSyBSpulZAOitONwy__LDWmH1nIr6iOtd_ZI", {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": "Bearer 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"
+            },
             body: JSON.stringify({
-                contents: [{ 
-                    parts: [{ text: `You are Bien AI, a Filipino Virtual Assistant mentor. Always answer in Taglish. Focus ONLY on freelancing and VA topics. Question: ${text}` }] 
-                }]
+                model: "llama-3.1-8b-instant",
+                messages: [
+                    { 
+                        role: "system", 
+                        content: "You are Bien AI, a Filipino Virtual Assistant mentor. Always answer in Taglish. Focus ONLY on freelancing and VA topics." 
+                    },
+                    { 
+                        role: "user", 
+                        content: text 
+                    }
+                ]
             })
         });
 
         const data = await response.json();
-        
-        // Safety check para hindi mag-error ang '0'
         let bienReply = "Pasensya na paps, medyo naguluhan ako. Paki-ulit?";
-        if (data.candidates && data.candidates[0].content) {
-            bienReply = data.candidates[0].content.parts[0].text;
+        
+        if (data.choices && data.choices[0].message) {
+            bienReply = data.choices[0].message.content;
         } else if (data.error) {
             console.error("API Error:", data.error.message);
             bienReply = "Error mula sa API: " + data.error.message;
