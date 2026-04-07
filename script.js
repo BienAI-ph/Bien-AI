@@ -463,6 +463,11 @@ async function sendMessage() {
     }
 }
 
+function scrollToBottom() {
+    const chatBox = document.getElementById('chatMessages');
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 function quickAction(type) { document.getElementById('chatInput').value = `Help me with ${type}`; sendMessage(); }
 function clearChat() { if(confirm("Delete all messages?")) { chatMessages = []; renderChats(); } }
 function scrollToBottom() { const chatBox = document.getElementById('chatBox'); if(chatBox) chatBox.scrollTop = chatBox.scrollHeight; }
