@@ -421,7 +421,7 @@ async function sendMessage() {
     scrollToBottom();
 
     try {
-        const response = await fetch("https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=AIzaSyAv3V1_9VXf39JDVKL8FxkoKvJDmmC_cOE", {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=AIzaSyBSpulZAOitONwy__LDWmH1nIr6iOtd_ZI", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
