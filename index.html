@@ -13,36 +13,46 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .level-bar { height: 6px; background: #27272a; border-radius: 10px; overflow: hidden; width: 100px; }
         .level-progress { height: 100%; background: #FACC15; transition: width 0.5s ease; }
+        
+        /* Para sa Nickname Modal */
+        #nicknameModal { background: rgba(0,0,0,0.9); backdrop-blur: 10px; }
     </style>
 </head>
 <body class="hide-scroll">
 
-    <header id="mainHeader" class="hidden fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 px-6 py-4 border-b border-zinc-800">
-    <div class="max-w-md mx-auto flex justify-between items-center">
-        <div class="flex flex-col">
-            <h1 class="text-xl font-black text-yellow-400 tracking-tighter leading-none">BIEN AI</h1>
-            <div class="flex items-center gap-2 mt-2">
-                <span class="text-[10px] font-bold text-zinc-500 uppercase">Level <span id="lvlDisplay">1</span>/20</span>
-                <div class="level-bar"><div id="lvlBar" class="level-progress" style="width: 5%;"></div></div>
-            </div>
+    <div id="nicknameModal" class="fixed inset-0 z-[60] flex items-center justify-center p-6 hidden">
+        <div class="w-full max-w-xs bg-zinc-900 p-8 rounded-3xl border border-zinc-800 text-center">
+            <h2 class="text-2xl font-black text-yellow-400 mb-2 uppercase">Welcome Paps!</h2>
+            <p class="text-zinc-400 text-sm mb-6 uppercase tracking-widest">Ano'ng tawag ko sa'yo?</p>
+            <input type="text" id="userInputName" placeholder="Nickname..." class="w-full bg-black border border-zinc-700 rounded-xl py-4 px-4 text-center text-white focus:outline-none focus:border-yellow-400 mb-4 uppercase font-bold">
+            <button id="startJourneyBtn" class="w-full bg-yellow-400 text-black font-black py-4 rounded-xl uppercase hover:scale-95 transition-all">Start Learning</button>
         </div>
-        
-        <button onclick="switchTab('settings')" class="text-zinc-400 hover:text-yellow-400 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-        </button>
     </div>
-</header>
+
+    <header id="mainHeader" class="hidden fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 px-6 py-4 border-b border-zinc-800">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div class="flex flex-col">
+                <h1 class="text-xl font-black text-yellow-400 tracking-tighter leading-none">BIEN AI</h1>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase italic" id="userNameLabel">Paps</span>
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase">Lvl <span id="lvlDisplay">1</span>/20</span>
+                    <div class="level-bar"><div id="lvlBar" class="level-progress" style="width: 5%;"></div></div>
+                </div>
+            </div>
+            
+            <button onclick="switchTab('settings')" class="text-zinc-400 hover:text-yellow-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+        </div>
+    </header>
 
     <div id="splash" class="fixed inset-0 flex flex-col items-center justify-center z-50 bg-black">
-        <h1 class="text-5xl font-black tracking-tighter text-yellow-400 animate-pulse">BIEN AI</h1>
-        <p class="text-zinc-500 mt-4 tracking-widest text-sm uppercase">Loading Excellence</p>
+        <h1 class="text-5xl font-black tracking-tighter text-yellow-400 animate-pulse uppercase">BIEN AI</h1>
+        <p class="text-zinc-500 mt-4 tracking-widest text-sm uppercase">Win Community Loading...</p>
     </div>
 
-    <main id="app" class="hidden min-h-screen max-w-md mx-auto px-6 flex flex-col pt-12 pb-24">
-        <div id="content" class="fade-in flex-grow py-8"></div>
+    <main id="app" class="hidden min-h-screen max-w-md mx-auto px-6 flex flex-col pt-24 pb-24">
+        <div id="content" class="fade-in flex-grow py-4"></div>
         <div id="footer-area" class="mt-auto">
             <button id="nextBtn" class="w-full bg-yellow-400 text-black font-black py-5 rounded-2xl text-lg hover:scale-[0.98] active:scale-95 transition-all uppercase">CONTINUE</button>
         </div>
@@ -69,7 +79,30 @@
         </div>
     </nav>
 
-<script src="courses.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRP6Ye3NzKK2TIDrK57xNv6geMPyW6cqc",
+            authDomain: "bienai.firebaseapp.com",
+            projectId: "bienai",
+            storageBucket: "bienai.firebasestorage.app",
+            messagingSenderId: "1034365140646",
+            appId: "1:1034365140646:web:5d935763986c80b583fe67",
+            measurementId: "G-CBC9ZRZYHC"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Export to Global for script.js to use
+        window.db = db;
+        window.fb = { doc, setDoc, getDoc, updateDoc };
+    </script>
+
+    <script src="courses.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
