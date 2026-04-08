@@ -53,9 +53,7 @@ const recommendedAITools = [
     { name: "Grammarly AI", cat: "Editing", desc: "Fix grammar & tone in real-time.", link: "https://grammarly.com" }
 ];
 
-// ==========================================
-// 1. APP STATE & CONFIG
-// ==========================================
+// --- 1. APP STATE & CONFIG ---
 let currentStep = 0;
 let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
 let completedCourses = JSON.parse(localStorage.getItem('bien_completed_courses')) || [];
@@ -63,39 +61,26 @@ let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
 let userNickname = localStorage.getItem('bien_user_nickname'); 
 let chatMessages = [];
 
-// ==========================================
-// 2. DOM ELEMENTS
-// ==========================================
-const app = document.getElementById('app');
-const splash = document.getElementById('splash');
-const nicknameModal = document.getElementById('nicknameModal');
-const mainHeader = document.getElementById('mainHeader');
-const bottomNav = document.getElementById('bottomNav');
-const contentArea = document.getElementById('content');
-const nextBtn = document.getElementById('nextBtn');
+// --- 2. DOM ELEMENTS ---
+const getEl = (id) => document.getElementById(id);
 
-// ==========================================
-// 3. INITIALIZATION (The "Splash" Killer)
-// ==========================================
+// --- 3. INITIALIZATION ---
 const initApp = () => {
     console.log("Bien AI: Initializing...");
     
     setTimeout(() => {
-        // Force hide splash screen
-        if (splash) splash.style.display = 'none';
+        const splash = getEl('splash');
+        if (splash) splash.style.display = 'none'; // Force hide
 
         if (!userNickname || userNickname === "Freelancer") {
-            if (nicknameModal) nicknameModal.classList.remove('hidden');
+            if (getEl('nicknameModal')) getEl('nicknameModal').classList.remove('hidden');
         } else {
-            // Show main UI components
-            if (app) app.classList.remove('hidden');
-            if (mainHeader) mainHeader.classList.remove('hidden');
-            if (bottomNav) bottomNav.classList.remove('hidden');
+            if (getEl('app')) getEl('app').classList.remove('hidden');
+            if (getEl('mainHeader')) getEl('mainHeader').classList.remove('hidden');
+            if (getEl('bottomNav')) getEl('bottomNav').classList.remove('hidden');
             
-            const nameLabel = document.getElementById('userNameLabel');
-            if (nameLabel) nameLabel.innerText = userNickname;
+            if (getEl('userNameLabel')) getEl('userNameLabel').innerText = userNickname;
             
-            // Check progress
             if (localStorage.getItem('bien_onboarding_done')) {
                 showDashboard();
             } else {
@@ -105,60 +90,52 @@ const initApp = () => {
     }, 2500);
 };
 
-// Start the app when window is ready
 window.onload = initApp;
 
-// ==========================================
-// 4. CORE FUNCTIONS (Renderers)
-// ==========================================
+// --- 4. CORE FUNCTIONS ---
 function renderStep() {
-    console.log("Rendering Step: " + currentStep);
-    // Dito papasok yung steps[] logic mo paps
-    if (contentArea) {
-        contentArea.innerHTML = `<h2 class="text-xl font-bold">Welcome sa Program, ${userNickname}!</h2>
-                                 <p class="text-zinc-400 mt-2">Ready ka na ba simulan ang VA journey mo?</p>`;
+    const content = getEl('content');
+    if (content) {
+        content.innerHTML = `<div class="fade-in">
+            <h2 class="text-xl font-bold uppercase text-yellow-400">Welcome, ${userNickname}!</h2>
+            <p class="text-zinc-500 mt-2">Simulan na natin ang iyong VA journey.</p>
+        </div>`;
     }
 }
 
 function showDashboard() {
-    console.log("Showing Dashboard...");
-    if (contentArea) {
-        contentArea.innerHTML = `<h2 class="text-xl font-bold uppercase text-yellow-400">Your Dashboard</h2>
-                                 <p class="text-zinc-500 text-sm">Level ${userLevel} VA Specialist</p>`;
+    const content = getEl('content');
+    if (content) {
+        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Dashboard</h2>`;
     }
 }
 
-// ==========================================
-// 5. EVENT HANDLERS (Modal & Nav)
-// ==========================================
-const startBtn = document.getElementById('startJourneyBtn');
+// --- 5. EVENT HANDLERS ---
+const startBtn = getEl('startJourneyBtn');
 if (startBtn) {
     startBtn.onclick = async () => {
-        const input = document.getElementById('userInputName');
-        const name = input.value.trim().toUpperCase();
+        const input = getEl('userInputName');
+        const name = input ? input.value.trim().toUpperCase() : "";
 
         if (name.length > 1) {
             userNickname = name;
             localStorage.setItem('bien_user_nickname', name);
             
-            // UI Switch
-            nicknameModal.classList.add('hidden');
-            app.classList.remove('hidden');
-            mainHeader.classList.remove('hidden');
-            bottomNav.classList.remove('hidden');
-            document.getElementById('userNameLabel').innerText = name;
+            getEl('nicknameModal').classList.add('hidden');
+            getEl('app').classList.remove('hidden');
+            getEl('mainHeader').classList.remove('hidden');
+            getEl('bottomNav').classList.remove('hidden');
+            getEl('userNameLabel').innerText = name;
 
-            // Firebase Sync (Win Community)
             try {
                 if (window.fb && window.db) {
-                    const { doc, setDoc } = window.fb;
-                    await setDoc(doc(window.db, "users", name), {
+                    await window.fb.setDoc(window.fb.doc(window.db, "users", name), {
                         name: name,
                         level: userLevel,
                         joinedAt: new Date()
                     });
                 }
-            } catch (e) { console.error("Firebase Error (Skipped):", e); }
+            } catch (e) { console.log("Firebase bypass"); }
 
             renderStep();
         } else {
@@ -167,36 +144,30 @@ if (startBtn) {
     };
 }
 
-// Global Tab Switcher
+// --- 6. GLOBAL TAB SWITCHER ---
 window.switchTab = function(tab) {
-    console.log("Active Tab: " + tab);
+    console.log("Tab: " + tab);
+    const content = getEl('content');
     
-    // UI: Reset all nav buttons colors
-    const navButtons = document.querySelectorAll('#bottomNav button');
-    navButtons.forEach(btn => {
+    // UI: Reset colors
+    document.querySelectorAll('#bottomNav button').forEach(btn => {
         btn.classList.remove('text-yellow-400');
         btn.classList.add('text-zinc-500');
     });
     
-    // UI: Highlight active tab
-    const activeBtn = document.getElementById(`nav-${tab}`);
+    // UI: Highlight active
+    const activeBtn = getEl(`nav-${tab}`);
     if (activeBtn) {
         activeBtn.classList.remove('text-zinc-500');
         activeBtn.classList.add('text-yellow-400');
     }
 
-    // Logic: Change Content
+    // Logic
     if (tab === 'program') renderStep();
-    if (tab === 'course') {
-        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Available Courses</h2>`;
+    else if (content) {
+        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">${tab} Section</h2>`;
     }
-    if (tab === 'tools') {
-        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">VA Tools</h2>`;
-    }
-    if (tab === 'chats') {
-        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Chat with Bien AI</h2>`;
-    }
-}
+};
 
 // --- TABS & NAVIGATION ---
 function switchTab(tab) {
