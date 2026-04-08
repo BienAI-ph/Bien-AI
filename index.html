@@ -46,7 +46,7 @@
         </div>
     </header>
 
-    <div id="splash" class="fixed inset-0 flex flex-col items-center justify-center z-50 bg-black">
+    <div id="splash" class="fixed inset-0 flex flex-col items-center justify-center z-[100] bg-black">
         <h1 class="text-5xl font-black tracking-tighter text-yellow-400 animate-pulse uppercase">BIEN AI</h1>
         <p class="text-zinc-500 mt-4 tracking-widest text-sm uppercase">Win Community Loading...</p>
     </div>
@@ -83,7 +83,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyCRP6Ye3NzKK2TIDrK57xNv6geMPyW6cqc",
             authDomain: "bienai.firebaseapp.com",
@@ -94,15 +93,16 @@
             measurementId: "G-CBC9ZRZYHC"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Export to Global for script.js to use
-        window.db = db;
+        // Initialize Firebase
+        const fbApp = initializeApp(firebaseConfig);
+        window.db = getFirestore(fbApp);
         window.fb = { doc, setDoc, getDoc, updateDoc };
+
+        // Signal that Firebase is ready
+        window.dispatchEvent(new Event('firebaseReady'));
     </script>
 
-    <script src="courses.js"></script>
-    <script src="script.js"></script>
+    <script src="courses.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
