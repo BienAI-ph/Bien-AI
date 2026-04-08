@@ -68,28 +68,48 @@ const nicknameModal = document.getElementById('nicknameModal');
 const mainHeader = document.getElementById('mainHeader');
 
 // --- INITIALIZATION ---
-function initApp() {
-    setTimeout(() => {
-        if (splash) splash.classList.add('hidden');
+
+// 1. Gawin nating function na pwedeng tawagin kahit saan
+const hideSplashAndStart = () => {
+    console.log("Force starting app...");
+    const splash = document.getElementById('splash');
+    const app = document.getElementById('app');
+    const nicknameModal = document.getElementById('nicknameModal');
+    const mainHeader = document.getElementById('mainHeader');
+
+    // Siguraduhin nating nakatago ang splash
+    if (splash) {
+        splash.style.display = 'none'; // Mas matapang kaysa sa classList.add
+    }
+
+    if (!userNickname || userNickname === "Freelancer") {
+        if (nicknameModal) nicknameModal.classList.remove('hidden');
+    } else {
+        if (app) app.classList.remove('hidden');
+        if (mainHeader) mainHeader.classList.remove('hidden');
+        const nameLabel = document.getElementById('userNameLabel');
+        if (nameLabel) nameLabel.innerText = userNickname;
         
-        // Logic kung bago o luma ang user
-        if (!userNickname || userNickname === "Freelancer") {
-            if (nicknameModal) nicknameModal.classList.remove('hidden');
+        if (localStorage.getItem('bien_onboarding_done')) {
+            if (typeof showDashboard === "function") showDashboard();
         } else {
-            if (app) app.classList.remove('hidden');
-            if (mainHeader) mainHeader.classList.remove('hidden');
-            if (document.getElementById('userNameLabel')) {
-                document.getElementById('userNameLabel').innerText = userNickname;
-            }
-            
-            if (localStorage.getItem('bien_onboarding_done')) {
-                if (typeof showDashboard === "function") showDashboard();
-            } else {
-                if (typeof renderStep === "function") renderStep();
-            }
+            if (typeof renderStep === "function") renderStep();
         }
-    }, 2500);
-}
+    }
+};
+
+// 2. Makinig sa 'firebaseReady' event na nilagay natin sa HTML kanina
+window.addEventListener('firebaseReady', () => {
+    setTimeout(hideSplashAndStart, 2500);
+});
+
+// 3. Fallback: Kung sakaling hindi mag-fire ang event, patakbuhin pa rin after 5 seconds
+setTimeout(() => {
+    const splash = document.getElementById('splash');
+    if (splash && splash.style.display !== 'none') {
+        hideSplashAndStart();
+    }
+}, 5000);
 
 // Patakbuhin ang init
 initApp();
