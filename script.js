@@ -58,8 +58,78 @@ let currentStep = 0;
 let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
 let completedCourses = JSON.parse(localStorage.getItem('bien_completed_courses')) || [];
 let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
-let userNickname = localStorage.getItem('bien_user_nickname') || "Freelancer";
+let userNickname = localStorage.getItem('bien_user_nickname'); // Tinanggal natin ang default na "Freelancer"
 let chatMessages = [];
+
+// --- DOM ELEMENTS ---
+const app = document.getElementById('app');
+const content = document.getElementById('content');
+const nextBtn = document.getElementById('nextBtn');
+const splash = document.getElementById('splash');
+const mainHeader = document.getElementById('mainHeader');
+const bottomNav = document.getElementById('bottomNav');
+const footerArea = document.getElementById('footer-area');
+const nicknameModal = document.getElementById('nicknameModal'); // Idinagdag natin ito
+
+// --- INITIALIZATION ---
+setTimeout(() => {
+    splash.classList.add('hidden');
+    
+    // Check kung may nickname na ang user
+    if (!userNickname) {
+        // Kung wala, ipakita ang "Welcome Paps" Modal
+        nicknameModal.classList.remove('hidden');
+    } else {
+        // Kung meron na, tuloy ang ligaya sa App
+        app.classList.remove('hidden');
+        document.getElementById('userNameLabel').innerText = userNickname;
+        
+        if (localStorage.getItem('bien_onboarding_done')) {
+            showDashboard();
+        } else {
+            renderStep();
+        }
+    }
+}, 2500);
+
+// --- NICKNAME MODAL LOGIC ---
+document.getElementById('startJourneyBtn').addEventListener('click', async () => {
+    const input = document.getElementById('userInputName');
+    const name = input.value.trim().toUpperCase();
+
+    if (name.length > 1) {
+        userNickname = name;
+        localStorage.setItem('bien_user_nickname', name);
+        
+        // UI Updates
+        nicknameModal.classList.add('hidden');
+        app.classList.remove('hidden');
+        document.getElementById('userNameLabel').innerText = name;
+
+        // Firebase "Win Community" Registration
+        const { doc, setDoc } = window.fb;
+        try {
+            await setDoc(doc(window.db, "users", name), {
+                name: name,
+                level: userLevel,
+                exp: 0,
+                joinedAt: new Date(),
+                status: "Early Access Tester"
+            });
+            console.log("Welcome sa community, " + name);
+        } catch (e) {
+            console.error("Firebase Error:", e);
+        }
+
+        renderStep();
+    } else {
+        alert("Paps, kahit nickname lang para hindi tayo anonymous!");
+    }
+});
+
+// --- RENDERERS ---
+function renderStep() {
+    // ... (tuloy ang dati mong renderStep function dito)
 
 // --- DOM ELEMENTS ---
 const app = document.getElementById('app');
