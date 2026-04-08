@@ -61,6 +61,67 @@ let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
 let userNickname = localStorage.getItem('bien_user_nickname'); 
 let chatMessages = [];
 
+// --- ONBOARDING QUESTIONS DATA ---
+const steps = [
+    { title: "KAHANDAAN", desc: "Handa ka na bang baguhin ang buhay mo sa tulong ng AI?" },
+    { title: "ORAS", desc: "Mayroon ka bang 1-2 oras bawat araw para mag-aral?" },
+    { title: "LAYUNIN", desc: "Gusto mo bang maging high-earning Virtual Assistant?" }
+];
+
+// --- RENDER ONBOARDING ---
+function renderStep() {
+    const content = document.getElementById('content');
+    if (!content) return;
+
+    if (currentStep < steps.length) {
+        // Ipakita ang Questions
+        content.innerHTML = `
+            <div class="fade-in space-y-4 text-center mt-10">
+                <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Question ${currentStep + 1}</span>
+                <h2 class="text-2xl font-black text-yellow-400 uppercase">${steps[currentStep].title}</h2>
+                <p class="text-zinc-400 text-sm leading-relaxed">${steps[currentStep].desc}</p>
+            </div>
+        `;
+        // Siguraduhin na lilitaw ang Continue button
+        document.getElementById('nextBtn').innerText = "CONTINUE";
+    } else {
+        // Kapag tapos na ang questions, i-save at ipakita ang Dashboard
+        localStorage.setItem('bien_onboarding_done', 'true');
+        showDashboard();
+    }
+}
+
+// --- HANDLE CONTINUE BUTTON ---
+document.getElementById('nextBtn').onclick = () => {
+    if (currentStep < steps.length) {
+        currentStep++;
+        renderStep();
+    } else {
+        showDashboard();
+    }
+};
+
+// --- SHOW MAIN DASHBOARD ---
+function showDashboard() {
+    const content = document.getElementById('content');
+    const bottomNav = document.getElementById('bottomNav');
+    
+    // Ipakita ang Nav at Header
+    bottomNav.classList.remove('hidden');
+    document.getElementById('mainHeader').classList.remove('hidden');
+    
+    // Ipakita ang Default na "Program" content
+    content.innerHTML = `
+        <div class="fade-in space-y-6">
+            <div class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                <h3 class="text-yellow-400 font-black uppercase text-sm mb-2">Current Progress</h3>
+                <p class="text-white font-bold">VA Foundations 101</p>
+                <p class="text-zinc-500 text-xs mt-1">Starting your career with Bien AI</p>
+            </div>
+            </div>
+    `;
+}
+
 // --- 2. DOM ELEMENTS ---
 const getEl = (id) => document.getElementById(id);
 
