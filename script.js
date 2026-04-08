@@ -139,6 +139,63 @@ const splash = document.getElementById('splash');
 const mainHeader = document.getElementById('mainHeader');
 const bottomNav = document.getElementById('bottomNav');
 const footerArea = document.getElementById('footer-area');
+const nicknameModal = document.getElementById('nicknameModal'); // Galing sa HTML update natin
+
+// --- MODAL LOGIC (Entrance to Win Community) ---
+document.getElementById('startJourneyBtn').addEventListener('click', async () => {
+    const input = document.getElementById('userInputName');
+    const name = input.value.trim().toUpperCase();
+
+    if (name.length > 1) {
+        userNickname = name;
+        localStorage.setItem('bien_user_nickname', name);
+        
+        // UI Transitions
+        nicknameModal.classList.add('hidden');
+        app.classList.remove('hidden');
+        mainHeader.classList.remove('hidden');
+        document.getElementById('userNameLabel').innerText = name;
+
+        // Firebase Registration (No-Login Entry)
+        const { doc, setDoc } = window.fb;
+        try {
+            await setDoc(doc(window.db, "users", name), {
+                name: name,
+                level: userLevel,
+                exp: 0,
+                joinedAt: new Date(),
+                status: "Active Student"
+            });
+            console.log("Member added to Firestore: " + name);
+        } catch (e) {
+            console.error("Firebase Sync Error:", e);
+        }
+
+        renderStep();
+    } else {
+        alert("Paps, nickname lang sapat na para makilala ka ni Bien!");
+    }
+});
+
+// --- INITIALIZATION ---
+setTimeout(() => {
+    splash.classList.add('hidden');
+    
+    // Check kung "Freelancer" (default) o tunay na nickname ang gamit
+    if (!userNickname || userNickname === "Freelancer") {
+        nicknameModal.classList.remove('hidden');
+    } else {
+        app.classList.remove('hidden');
+        mainHeader.classList.remove('hidden');
+        document.getElementById('userNameLabel').innerText = userNickname;
+        
+        if (localStorage.getItem('bien_onboarding_done')) {
+            showDashboard();
+        } else {
+            renderStep();
+        }
+    }
+}, 2500);
 
 // --- INITIALIZATION ---
 setTimeout(() => {
