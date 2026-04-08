@@ -144,30 +144,38 @@ if (startBtn) {
     };
 }
 
-// --- 6. GLOBAL TAB SWITCHER ---
+// 1. Siguraduhin na ang switchTab ay naglalagay ng content paps
 window.switchTab = function(tab) {
-    console.log("Tab: " + tab);
-    const content = getEl('content');
+    const contentArea = document.getElementById('content');
     
-    // UI: Reset colors
+    // I-reset ang kulay ng lahat ng buttons sa baba
     document.querySelectorAll('#bottomNav button').forEach(btn => {
         btn.classList.remove('text-yellow-400');
         btn.classList.add('text-zinc-500');
     });
-    
-    // UI: Highlight active
-    const activeBtn = getEl(`nav-${tab}`);
+
+    // I-highlight ang pinindot na button
+    const activeBtn = document.getElementById(`nav-${tab}`);
     if (activeBtn) {
         activeBtn.classList.remove('text-zinc-500');
         activeBtn.classList.add('text-yellow-400');
     }
 
-    // Logic
-    if (tab === 'program') renderStep();
-    else if (content) {
-        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">${tab} Section</h2>`;
+    // Dito natin ilalagay ang "Dating Ganda" ng bawat section
+    if (tab === 'program') {
+        contentArea.innerHTML = `
+            <div class="fade-in">
+                <h2 class="text-xl font-bold text-yellow-400 uppercase">Welcome, ${userNickname}!</h2>
+                <p class="text-zinc-400 mt-2">Handa ka na ba sa VA journey mo? Ipagpatuloy natin ang iyong training.</p>
+                </div>`;
+    } else if (tab === 'course') {
+        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Available Courses</h2><p class="text-zinc-500">Loading courses...</p>`;
+    } else if (tab === 'tools') {
+        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">VA Tools</h2><p class="text-zinc-500">Checking your toolkit...</p>`;
+    } else if (tab === 'chats') {
+        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Chat with Bien AI</h2><p class="text-zinc-500">Start a conversation...</p>`;
     }
-};
+}
 
 // --- TABS & NAVIGATION ---
 function switchTab(tab) {
