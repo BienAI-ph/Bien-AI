@@ -52,197 +52,128 @@ const recommendedAITools = [
     { name: "Otter.ai", cat: "Meetings", desc: "Transcribe meetings & summarize notes.", link: "https://otter.ai" },
     { name: "Grammarly AI", cat: "Editing", desc: "Fix grammar & tone in real-time.", link: "https://grammarly.com" }
 ];
-
-// --- 1. APP STATE & CONFIG ---
-let currentStep = 0;
-let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
-let completedCourses = JSON.parse(localStorage.getItem('bien_completed_courses')) || [];
-let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
-let userNickname = localStorage.getItem('bien_user_nickname'); 
-let chatMessages = [];
-
-// --- ONBOARDING QUESTIONS DATA ---
-const steps = [
-    { title: "KAHANDAAN", desc: "Handa ka na bang baguhin ang buhay mo sa tulong ng AI?" },
-    { title: "ORAS", desc: "Mayroon ka bang 1-2 oras bawat araw para mag-aral?" },
-    { title: "LAYUNIN", desc: "Gusto mo bang maging high-earning Virtual Assistant?" }
+// --- 1. DATA & CONFIGURATION ---
+const onboardingSteps = [
+    { id: "skills", type: "multi-select", question: "What skills do you have?", options: ["Admin & organisation", "Social media management", "Design & creative", "Customer support", "Tech & programming skills", "Writing & content creation", "Data entry & research", "Project & team management"] },
+    { id: "internet", type: "select", question: "Is your internet reliable?", options: ["Yes, it's fast and stable.", "Sometimes it's slow.", "No, it's unreliable."] },
+    { id: "source", type: "select", question: "Where did you find Bien AI?", options: ["Tiktok", "Instagram", "Facebook", "Others"] },
+    { id: "ai_exp", type: "select", question: "Have you used AI tools?", options: ["Yes, regularly.", "Tried a few times.", "Not yet."] },
+    { id: "roadmap", type: "info", question: "Here's your roadmap!", sub: "📈 Based on your profile, we've optimized your path." },
+    { id: "hours", type: "select", question: "How many hours can you learn?", options: ["1-2 hours", "3-4 hours", "Less than 1 hour"] },
+    { id: "motivation", type: "select", question: "Are you self motivated?", options: ["Yes, definitely.", "Sometimes.", "No, need supervision."] },
+    { id: "deadlines", type: "select", question: "Do you meet deadlines?", options: ["Yes, always.", "Usually.", "Often late."] },
+    { id: "ready", type: "select", question: "Ready to work from home?", options: ["Yes!", "Willing to learn.", "Prefer office."] },
+    { id: "name_prompt", type: "info", question: "Almost there!", sub: "Let's set up your dashboard." },
+    { id: "potential", type: "info", question: "Amazing potential!", sub: "📈 Finish this within the month." },
+    { id: "pain_traffic", type: "story", title: "Traffic commute", desc: "Hours stolen from your day.", emoji: "🚗" },
+    { id: "pain_office", type: "story", title: "Office stress", desc: "Toxic environment.", emoji: "🏢" },
+    { id: "pain_salary", type: "story", title: "Low Salary", desc: "You deserve more.", emoji: "💸" },
+    { id: "final_onboarding", type: "info", question: "Welcome to Bien AI", sub: "Let's grow your VA career." }
 ];
 
-// --- RENDER ONBOARDING ---
-function renderStep() {
-    const content = document.getElementById('content');
-    if (!content) return;
-
-    if (currentStep < steps.length) {
-        // Ipakita ang Questions
-        content.innerHTML = `
-            <div class="fade-in space-y-4 text-center mt-10">
-                <span class="text-xs font-black text-zinc-500 uppercase tracking-widest">Question ${currentStep + 1}</span>
-                <h2 class="text-2xl font-black text-yellow-400 uppercase">${steps[currentStep].title}</h2>
-                <p class="text-zinc-400 text-sm leading-relaxed">${steps[currentStep].desc}</p>
-            </div>
-        `;
-        // Siguraduhin na lilitaw ang Continue button
-        document.getElementById('nextBtn').innerText = "CONTINUE";
-    } else {
-        // Kapag tapos na ang questions, i-save at ipakita ang Dashboard
-        localStorage.setItem('bien_onboarding_done', 'true');
-        showDashboard();
-    }
-}
-
-// --- HANDLE CONTINUE BUTTON ---
-document.getElementById('nextBtn').onclick = () => {
-    if (currentStep < steps.length) {
-        currentStep++;
-        renderStep();
-    } else {
-        showDashboard();
-    }
-};
-
-// --- SHOW MAIN DASHBOARD ---
-function showDashboard() {
-    const content = document.getElementById('content');
-    const bottomNav = document.getElementById('bottomNav');
-    
-    // Ipakita ang Nav at Header
-    bottomNav.classList.remove('hidden');
-    document.getElementById('mainHeader').classList.remove('hidden');
-    
-    // Ipakita ang Default na "Program" content
-    content.innerHTML = `
-        <div class="fade-in space-y-6">
-            <div class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
-                <h3 class="text-yellow-400 font-black uppercase text-sm mb-2">Current Progress</h3>
-                <p class="text-white font-bold">VA Foundations 101</p>
-                <p class="text-zinc-500 text-xs mt-1">Starting your career with Bien AI</p>
-            </div>
-            </div>
-    `;
-}
-
-// --- 2. DOM ELEMENTS ---
-const getEl = (id) => document.getElementById(id);
+// --- 2. APP STATE ---
+let currentStep = 0;
+let userNickname = localStorage.getItem('bien_user_nickname'); 
+let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
 
 // --- 3. INITIALIZATION ---
-const initApp = () => {
-    console.log("Bien AI: Initializing...");
-    
+window.onload = () => {
     setTimeout(() => {
-        const splash = getEl('splash');
-        if (splash) splash.style.display = 'none'; // Force hide
-
+        document.getElementById('splash').style.display = 'none';
         if (!userNickname || userNickname === "Freelancer") {
-            if (getEl('nicknameModal')) getEl('nicknameModal').classList.remove('hidden');
+            document.getElementById('nicknameModal').classList.remove('hidden');
         } else {
-            if (getEl('app')) getEl('app').classList.remove('hidden');
-            if (getEl('mainHeader')) getEl('mainHeader').classList.remove('hidden');
-            if (getEl('bottomNav')) getEl('bottomNav').classList.remove('hidden');
-            
-            if (getEl('userNameLabel')) getEl('userNameLabel').innerText = userNickname;
-            
-            if (localStorage.getItem('bien_onboarding_done')) {
-                showDashboard();
-            } else {
-                renderStep();
-            }
+            document.getElementById('app').classList.remove('hidden');
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('userNameLabel').innerText = userNickname;
+            if (localStorage.getItem('bien_onboarding_done')) showDashboard();
+            else renderStep();
         }
     }, 2500);
 };
 
-window.onload = initApp;
-
-// --- 4. CORE FUNCTIONS ---
+// --- 4. THE ONBOARDING RENDERER ---
 function renderStep() {
     const content = document.getElementById('content');
+    const nextBtn = document.getElementById('nextBtn');
     if (!content) return;
 
-    // Tinitignan nito kung may tanong pa sa steps array
-    if (currentStep < steps.length) {
+    if (currentStep < onboardingSteps.length) {
+        const step = onboardingSteps[currentStep];
+        nextBtn.classList.remove('hidden');
+        
+        // Iba-ibang style base sa "type" ng question
         content.innerHTML = `
-            <div class="fade-in space-y-4 text-center mt-10">
-                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Step ${currentStep + 1} of ${steps.length}</span>
-                <h2 class="text-2xl font-black text-yellow-400 uppercase tracking-tighter">${steps[currentStep].title}</h2>
-                <p class="text-zinc-400 text-sm leading-relaxed mx-auto max-w-[250px]">${steps[currentStep].desc}</p>
+            <div class="fade-in space-y-6 text-center mt-6">
+                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Step ${currentStep + 1} of ${onboardingSteps.length}</span>
+                <h2 class="text-2xl font-black text-yellow-400 uppercase tracking-tighter">${step.question || step.title || ""}</h2>
+                ${step.sub ? `<p class="text-zinc-400 text-sm italic">${step.sub}</p>` : ''}
+                ${step.desc ? `<p class="text-zinc-400 text-sm">${step.desc}</p>` : ''}
+                
+                <div class="grid gap-3 mt-8">
+                    ${step.options ? step.options.map(opt => `
+                        <button onclick="handleOption()" class="w-full p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs font-bold hover:border-yellow-400 transition-all uppercase">${opt}</button>
+                    `).join('') : ''}
+                </div>
             </div>
         `;
-        // Siguraduhin nating "CONTINUE" ang nakasulat sa button
-        if (document.getElementById('nextBtn')) {
-            document.getElementById('nextBtn').innerText = "CONTINUE";
-        }
+        nextBtn.innerText = "CONTINUE";
     } else {
-        // Kapag lumampas na sa huling tanong, Dashboard na!
         localStorage.setItem('bien_onboarding_done', 'true');
         showDashboard();
     }
 }
 
-// --- 5. EVENT HANDLERS ---
-const startBtn = getEl('startJourneyBtn');
-if (startBtn) {
-    startBtn.onclick = async () => {
-        const input = getEl('userInputName');
-        const name = input ? input.value.trim().toUpperCase() : "";
+function handleOption() {
+    // Kapag pumili ng option, automatic next!
+    currentStep++;
+    renderStep();
+}
 
-        if (name.length > 1) {
-            userNickname = name;
-            localStorage.setItem('bien_user_nickname', name);
-            
-            getEl('nicknameModal').classList.add('hidden');
-            getEl('app').classList.remove('hidden');
-            getEl('mainHeader').classList.remove('hidden');
-            getEl('bottomNav').classList.remove('hidden');
-            getEl('userNameLabel').innerText = name;
+document.getElementById('nextBtn').onclick = () => {
+    currentStep++;
+    renderStep();
+};
 
-            try {
-                if (window.fb && window.db) {
-                    await window.fb.setDoc(window.fb.doc(window.db, "users", name), {
-                        name: name,
-                        level: userLevel,
-                        joinedAt: new Date()
-                    });
-                }
-            } catch (e) { console.log("Firebase bypass"); }
-
-            renderStep();
-        } else {
-            alert("Paps, nickname lang para makilala ka ni Bien AI!");
-        }
-    };
+// --- 5. DASHBOARD & TABS ---
+function showDashboard() {
+    document.getElementById('bottomNav').classList.remove('hidden');
+    document.getElementById('nextBtn').classList.add('hidden');
+    switchTab('program');
 }
 
 window.switchTab = function(tab) {
     const content = document.getElementById('content');
-    
-    // UI Update: Icons
-    document.querySelectorAll('#bottomNav button').forEach(btn => {
-        btn.classList.remove('text-yellow-400');
-        btn.classList.add('text-zinc-500');
-    });
-    const activeBtn = document.getElementById(`nav-${tab}`);
-    if (activeBtn) activeBtn.classList.replace('text-zinc-500', 'text-yellow-400');
+    document.querySelectorAll('#bottomNav button').forEach(btn => btn.classList.replace('text-yellow-400', 'text-zinc-500'));
+    document.getElementById(`nav-${tab}`)?.classList.replace('text-zinc-500', 'text-yellow-400');
 
-    // Content Update
     if (tab === 'program') {
-        showDashboard();
-    } else if (tab === 'course') {
-        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">VA Courses</h2>
-                             <div class="mt-4 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-sm text-zinc-400 text-center italic">Loading latest courses...</div>`;
-    } else if (tab === 'tools') {
-        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Digital Toolkit</h2>
-                             <div class="mt-4 grid grid-cols-2 gap-4">
-                                <div class="p-4 bg-zinc-900 rounded-xl text-center border border-zinc-800 text-xs">AI Chatbot</div>
-                                <div class="p-4 bg-zinc-900 rounded-xl text-center border border-zinc-800 text-xs">PDF Editor</div>
-                             </div>`;
-    } else if (tab === 'chats') {
-        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase tracking-tighter">Bien AI Assistant</h2>
-                             <div class="mt-4 p-6 bg-yellow-400/5 border border-yellow-400/20 rounded-3xl text-zinc-400 text-center text-xs">
-                                Hi Paps! Ask me anything about Virtual Assistance.
-                             </div>`;
-    } else if (tab === 'settings') {
-        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Settings</h2>
-                             <button onclick="localStorage.clear(); location.reload();" class="mt-6 w-full py-4 bg-red-900/10 border border-red-900/30 text-red-500 rounded-2xl font-bold text-xs uppercase">Reset Progress</button>`;
+        content.innerHTML = `
+            <div class="fade-in space-y-6">
+                <div class="p-6 bg-zinc-900 rounded-3xl border border-zinc-800">
+                    <h3 class="text-yellow-400 font-black uppercase text-xs mb-2 tracking-widest">Lvl ${userLevel} Progress</h3>
+                    <p class="text-white font-black text-lg">Road to 100k Program</p>
+                    <div class="mt-4 h-1.5 w-full bg-black rounded-full overflow-hidden">
+                        <div class="h-full bg-yellow-400" style="width: ${userLevel * 5}%"></div>
+                    </div>
+                </div>
+            </div>`;
+    } else {
+        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">${tab}</h2><p class="text-zinc-500 text-sm mt-2">Win Community is updating this content...</p>`;
+    }
+};
+
+// --- NICKNAME HANDLER ---
+document.getElementById('startJourneyBtn').onclick = () => {
+    const name = document.getElementById('userInputName').value.trim().toUpperCase();
+    if (name.length > 1) {
+        userNickname = name;
+        localStorage.setItem('bien_user_nickname', name);
+        document.getElementById('nicknameModal').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        document.getElementById('mainHeader').classList.remove('hidden');
+        document.getElementById('userNameLabel').innerText = name;
+        renderStep();
     }
 };
 
