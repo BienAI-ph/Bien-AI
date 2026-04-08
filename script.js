@@ -53,7 +53,9 @@ const recommendedAITools = [
     { name: "Grammarly AI", cat: "Editing", desc: "Fix grammar & tone in real-time.", link: "https://grammarly.com" }
 ];
 
-// --- APP STATE ---
+// ==========================================
+// 1. APP STATE & CONFIG
+// ==========================================
 let currentStep = 0;
 let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
 let completedCourses = JSON.parse(localStorage.getItem('bien_completed_courses')) || [];
@@ -61,282 +63,139 @@ let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
 let userNickname = localStorage.getItem('bien_user_nickname'); 
 let chatMessages = [];
 
-// --- DOM ELEMENTS ---
+// ==========================================
+// 2. DOM ELEMENTS
+// ==========================================
 const app = document.getElementById('app');
 const splash = document.getElementById('splash');
 const nicknameModal = document.getElementById('nicknameModal');
 const mainHeader = document.getElementById('mainHeader');
+const bottomNav = document.getElementById('bottomNav');
+const contentArea = document.getElementById('content');
+const nextBtn = document.getElementById('nextBtn');
 
-// --- INITIALIZATION ---
-
-// 1. Gawin nating function na pwedeng tawagin kahit saan
-const hideSplashAndStart = () => {
-    console.log("Force starting app...");
-    const splash = document.getElementById('splash');
-    const app = document.getElementById('app');
-    const nicknameModal = document.getElementById('nicknameModal');
-    const mainHeader = document.getElementById('mainHeader');
-
-    // Siguraduhin nating nakatago ang splash
-    if (splash) {
-        splash.style.display = 'none'; // Mas matapang kaysa sa classList.add
-    }
-
-    if (!userNickname || userNickname === "Freelancer") {
-        if (nicknameModal) nicknameModal.classList.remove('hidden');
-    } else {
-        if (app) app.classList.remove('hidden');
-        if (mainHeader) mainHeader.classList.remove('hidden');
-        const nameLabel = document.getElementById('userNameLabel');
-        if (nameLabel) nameLabel.innerText = userNickname;
-        
-        if (localStorage.getItem('bien_onboarding_done')) {
-            if (typeof showDashboard === "function") showDashboard();
-        } else {
-            if (typeof renderStep === "function") renderStep();
-        }
-    }
-};
-
-// 2. Makinig sa 'firebaseReady' event na nilagay natin sa HTML kanina
-window.addEventListener('firebaseReady', () => {
-    setTimeout(hideSplashAndStart, 2500);
-});
-
-// 3. Fallback: Kung sakaling hindi mag-fire ang event, patakbuhin pa rin after 5 seconds
-setTimeout(() => {
-    const splash = document.getElementById('splash');
-    if (splash && splash.style.display !== 'none') {
-        hideSplashAndStart();
-    }
-}, 5000);
-
-// Patakbuhin ang init
-initApp();
-
-// --- MODAL CLICK HANDLER ---
-if (document.getElementById('startJourneyBtn')) {
-    document.getElementById('startJourneyBtn').addEventListener('click', async () => {
-        const input = document.getElementById('userInputName');
-        const name = input.value.trim().toUpperCase();
-
-        if (name.length > 1) {
-            userNickname = name;
-            localStorage.setItem('bien_user_nickname', name);
-// --- APP STATE ---
-let currentStep = 0;
-let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
-let completedCourses = JSON.parse(localStorage.getItem('bien_completed_courses')) || [];
-let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
-let userNickname = localStorage.getItem('bien_user_nickname'); 
-let chatMessages = [];
-
-// --- DOM ELEMENTS ---
-const app = document.getElementById('app');
-const splash = document.getElementById('splash');
-const nicknameModal = document.getElementById('nicknameModal');
-const mainHeader = document.getElementById('mainHeader');
-const startJourneyBtn = document.getElementById('startJourneyBtn');
-
-// --- INITIALIZATION ---
-function initApp() {
+// ==========================================
+// 3. INITIALIZATION (The "Splash" Killer)
+// ==========================================
+const initApp = () => {
+    console.log("Bien AI: Initializing...");
+    
     setTimeout(() => {
-        // Force hide splash gamit ang style para sigurado
-        if (splash) {
-            splash.style.display = 'none';
-        }
-        
+        // Force hide splash screen
+        if (splash) splash.style.display = 'none';
+
         if (!userNickname || userNickname === "Freelancer") {
             if (nicknameModal) nicknameModal.classList.remove('hidden');
         } else {
+            // Show main UI components
             if (app) app.classList.remove('hidden');
             if (mainHeader) mainHeader.classList.remove('hidden');
+            if (bottomNav) bottomNav.classList.remove('hidden');
+            
             const nameLabel = document.getElementById('userNameLabel');
             if (nameLabel) nameLabel.innerText = userNickname;
             
+            // Check progress
             if (localStorage.getItem('bien_onboarding_done')) {
-                if (typeof showDashboard === "function") showDashboard();
+                showDashboard();
             } else {
-                if (typeof renderStep === "function") renderStep();
+                renderStep();
             }
         }
     }, 2500);
-}
+};
 
-// Patakbuhin ang init kapag ready na ang lahat
+// Start the app when window is ready
 window.onload = initApp;
 
-// --- MODAL CLICK HANDLER (ISANG BESES LANG DAPAT ITO) ---
-if (startJourneyBtn) {
-    startJourneyBtn.onclick = async () => {
+// ==========================================
+// 4. CORE FUNCTIONS (Renderers)
+// ==========================================
+function renderStep() {
+    console.log("Rendering Step: " + currentStep);
+    // Dito papasok yung steps[] logic mo paps
+    if (contentArea) {
+        contentArea.innerHTML = `<h2 class="text-xl font-bold">Welcome sa Program, ${userNickname}!</h2>
+                                 <p class="text-zinc-400 mt-2">Ready ka na ba simulan ang VA journey mo?</p>`;
+    }
+}
+
+function showDashboard() {
+    console.log("Showing Dashboard...");
+    if (contentArea) {
+        contentArea.innerHTML = `<h2 class="text-xl font-bold uppercase text-yellow-400">Your Dashboard</h2>
+                                 <p class="text-zinc-500 text-sm">Level ${userLevel} VA Specialist</p>`;
+    }
+}
+
+// ==========================================
+// 5. EVENT HANDLERS (Modal & Nav)
+// ==========================================
+const startBtn = document.getElementById('startJourneyBtn');
+if (startBtn) {
+    startBtn.onclick = async () => {
         const input = document.getElementById('userInputName');
-        if (!input) return;
-        
         const name = input.value.trim().toUpperCase();
 
         if (name.length > 1) {
             userNickname = name;
             localStorage.setItem('bien_user_nickname', name);
             
-            // UI Updates
-            if (nicknameModal) nicknameModal.classList.add('hidden');
-            if (app) app.classList.remove('hidden');
-            if (mainHeader) mainHeader.classList.remove('hidden');
-            const nameLabel = document.getElementById('userNameLabel');
-            if (nameLabel) nameLabel.innerText = name;
+            // UI Switch
+            nicknameModal.classList.add('hidden');
+            app.classList.remove('hidden');
+            mainHeader.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            document.getElementById('userNameLabel').innerText = name;
 
-            // Firebase Registration - Win Community
+            // Firebase Sync (Win Community)
             try {
                 if (window.fb && window.db) {
                     const { doc, setDoc } = window.fb;
                     await setDoc(doc(window.db, "users", name), {
                         name: name,
                         level: userLevel,
-                        joinedAt: new Date(),
-                        status: "Early Access Tester"
+                        joinedAt: new Date()
                     });
-                    console.log("Registered to Firestore: " + name);
                 }
-            } catch (e) {
-                console.error("Firebase Sync Error (Skipped):", e);
-            }
+            } catch (e) { console.error("Firebase Error (Skipped):", e); }
 
-            if (typeof renderStep === "function") renderStep();
+            renderStep();
         } else {
             alert("Paps, nickname lang para makilala ka ni Bien AI!");
         }
     };
 }
 
-// --- RENDERERS ---
-function renderStep() {
-    // ... (tuloy ang dati mong renderStep function dito)
-
-// --- DOM ELEMENTS ---
-const app = document.getElementById('app');
-const content = document.getElementById('content');
-const nextBtn = document.getElementById('nextBtn');
-const splash = document.getElementById('splash');
-const mainHeader = document.getElementById('mainHeader');
-const bottomNav = document.getElementById('bottomNav');
-const footerArea = document.getElementById('footer-area');
-const nicknameModal = document.getElementById('nicknameModal'); // Galing sa HTML update natin
-
-// --- MODAL LOGIC (Entrance to Win Community) ---
-document.getElementById('startJourneyBtn').addEventListener('click', async () => {
-    const input = document.getElementById('userInputName');
-    const name = input.value.trim().toUpperCase();
-
-    if (name.length > 1) {
-        userNickname = name;
-        localStorage.setItem('bien_user_nickname', name);
-        
-        // UI Transitions
-        nicknameModal.classList.add('hidden');
-        app.classList.remove('hidden');
-        mainHeader.classList.remove('hidden');
-        document.getElementById('userNameLabel').innerText = name;
-
-        // Firebase Registration (No-Login Entry)
-        const { doc, setDoc } = window.fb;
-        try {
-            await setDoc(doc(window.db, "users", name), {
-                name: name,
-                level: userLevel,
-                exp: 0,
-                joinedAt: new Date(),
-                status: "Active Student"
-            });
-            console.log("Member added to Firestore: " + name);
-        } catch (e) {
-            console.error("Firebase Sync Error:", e);
-        }
-
-        renderStep();
-    } else {
-        alert("Paps, nickname lang sapat na para makilala ka ni Bien!");
-    }
-});
-
-// --- INITIALIZATION ---
-setTimeout(() => {
-    splash.classList.add('hidden');
+// Global Tab Switcher
+window.switchTab = function(tab) {
+    console.log("Active Tab: " + tab);
     
-    // Check kung "Freelancer" (default) o tunay na nickname ang gamit
-    if (!userNickname || userNickname === "Freelancer") {
-        nicknameModal.classList.remove('hidden');
-    } else {
-        app.classList.remove('hidden');
-        mainHeader.classList.remove('hidden');
-        document.getElementById('userNameLabel').innerText = userNickname;
-        
-        if (localStorage.getItem('bien_onboarding_done')) {
-            showDashboard();
-        } else {
-            renderStep();
-        }
+    // UI: Reset all nav buttons colors
+    const navButtons = document.querySelectorAll('#bottomNav button');
+    navButtons.forEach(btn => {
+        btn.classList.remove('text-yellow-400');
+        btn.classList.add('text-zinc-500');
+    });
+    
+    // UI: Highlight active tab
+    const activeBtn = document.getElementById(`nav-${tab}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-zinc-500');
+        activeBtn.classList.add('text-yellow-400');
     }
-}, 2500);
 
-// --- INITIALIZATION ---
-setTimeout(() => {
-    splash.classList.add('hidden');
-    app.classList.remove('hidden');
-    if (localStorage.getItem('bien_onboarding_done')) {
-        showDashboard();
-    } else {
-        renderStep();
+    // Logic: Change Content
+    if (tab === 'program') renderStep();
+    if (tab === 'course') {
+        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Available Courses</h2>`;
     }
-}, 2500);
-
-// --- RENDERERS ---
-function renderStep() {
-    const step = steps[currentStep];
-    if (currentStep >= steps.length) { 
-        localStorage.setItem('bien_onboarding_done', 'true');
-        showDashboard(); 
-        return; 
+    if (tab === 'tools') {
+        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">VA Tools</h2>`;
     }
-    content.innerHTML = "";
-    nextBtn.classList.remove('hidden');
-
-    if (step.type === "multi-select" || step.type === "select") {
-        content.innerHTML = `<h2 class="text-3xl font-bold mb-8 leading-tight">${step.question}</h2>`;
-        const container = document.createElement('div');
-        container.className = "space-y-3";
-        step.options.forEach(opt => {
-            const btn = document.createElement('button');
-            const isSelected = selectedSkills.includes(opt);
-            btn.className = `w-full text-left p-5 rounded-2xl bg-zinc-900 border border-zinc-800 transition-all ${isSelected ? 'yellow-border' : ''}`;
-            btn.innerText = opt;
-            btn.onclick = () => {
-                if(step.type === "select") {
-                    container.querySelectorAll('button').forEach(b => b.classList.remove('yellow-border'));
-                    selectedSkills = [opt];
-                } else {
-                    btn.classList.toggle('yellow-border');
-                    if(selectedSkills.includes(opt)) selectedSkills = selectedSkills.filter(s => s !== opt);
-                    else selectedSkills.push(opt);
-                }
-                localStorage.setItem('bien_user_skills', JSON.stringify(selectedSkills));
-            };
-            container.appendChild(btn);
-        });
-        content.appendChild(container);
-    } else if (step.id === "name") {
-        content.innerHTML = `<h2 class="text-3xl font-bold mb-8">${step.question}</h2><input type="text" id="userInput" oninput="saveNickname(this.value)" class="w-full bg-zinc-900 p-6 rounded-2xl border border-zinc-800 focus:border-yellow-400 outline-none text-xl" placeholder="${step.placeholder}">`;
-    } else if (step.type === "loading") {
-        nextBtn.classList.add('hidden');
-        content.innerHTML = `<div class="flex flex-col items-center justify-center h-full py-20 text-center"><div class="w-20 h-20 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mb-8"></div><h2 class="text-2xl font-bold">${step.text}</h2><p class="text-zinc-500 mt-2">${step.sub}</p></div>`;
-        setTimeout(() => { currentStep++; renderStep(); }, 3000);
-    } else if (step.type === "info" || step.type === "story") {
-        content.innerHTML = `<div class="flex flex-col items-center text-center py-10 space-y-6">${step.emoji ? `<span class="text-8xl">${step.emoji}</span>` : '<h1 class="text-4xl font-black text-yellow-400">BIEN AI</h1>'}<h2 class="text-4xl font-bold leading-tight">${step.question || step.title}</h2><p class="text-xl text-zinc-400">${step.sub || step.desc}</p></div>`;
+    if (tab === 'chats') {
+        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Chat with Bien AI</h2>`;
     }
-}
-
-function saveNickname(val) {
-    userNickname = val;
-    localStorage.setItem('bien_user_nickname', val);
 }
 
 // --- TABS & NAVIGATION ---
