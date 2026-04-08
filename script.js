@@ -485,6 +485,7 @@ async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
 
+    // Ipakita ang message ng user sa UI
     chatMessages.push({ role: "user", text: text });
     input.value = "";
     renderChats();
@@ -502,7 +503,7 @@ async function sendMessage() {
                 messages: [
                     { 
                         role: "system", 
-                        content: "You are Bien AI, a Filipino Virtual Assistant mentor. Always answer in Taglish. Focus ONLY on freelancing and VA topics." 
+                        content: "You are Bien AI, a Filipino Virtual Assistant mentor. Always answer in Taglish. Focus ONLY on freelancing and VA topics. Be supportive and professional." 
                     },
                     { 
                         role: "user", 
@@ -517,19 +518,66 @@ async function sendMessage() {
         
         if (data.choices && data.choices[0].message) {
             bienReply = data.choices[0].message.content;
+            
+            // --- SUCCESS! DITO TAYO MAG-LEVEL UP ---
+            // Tinatawag ang function para mag-save sa Firebase at mag-update ng UI
+            addExp(); 
+            
         } else if (data.error) {
             console.error("API Error:", data.error.message);
             bienReply = "Error mula sa API: " + data.error.message;
         }
 
+        // Ipakita ang reply ni Bien AI
         chatMessages.push({ role: "assistant", text: bienReply });
         renderChats();
         scrollToBottom();
 
     } catch (error) {
         console.error("Connection Error:", error);
-        chatMessages.push({ role: "assistant", text: "Mukhang nag-offline ang brain ko. Check mo net mo!" });
+        chatMessages.push({ role: "assistant", text: "Mukhang nag-offline ang brain ko, paps. Check mo net mo!" });
         renderChats();
+        scrollToBottom();
+    }
+}
+
+// --- LEVEL UP FUNCTION (Para sa Firebase Sync) ---
+async function addExp() {
+    // Gamitin ang global variables mula sa HTML/Firebase setup
+    const { doc, setDoc, getDoc } = window.fb; 
+    const userRef = doc(window.db, "users", userNickname);
+    
+    try {
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            let currentLevel = userSnap.data().level || 1;
+            let nextLevel = currentLevel + 1;
+
+            // 1. I-update ang Database (Firestore)
+            await setDoc(userRef, { 
+                level: nextLevel,
+                lastActive: new Date() 
+            }, { merge: true });
+            
+            // 2. I-update ang UI (Header Display)
+            if(document.getElementById('lvlDisplay')) {
+                document.getElementById('lvlDisplay').innerText = nextLevel;
+            }
+            
+            // 3. I-update ang Progress Bar (Width calculation based on 20 levels)
+            if(document.getElementById('lvlBar')) {
+                let progressWidth = (nextLevel / 20) * 100;
+                document.getElementById('lvlBar').style.width = `${progressWidth}%`;
+            }
+            
+            // 4. I-save din sa LocalStorage para back-up
+            localStorage.setItem('bien_user_level', nextLevel);
+            
+            console.log("Level Up Success: " + nextLevel);
+        }
+    } catch (e) {
+        console.error("Error sa pag-level up:", e);
     }
 }
 
