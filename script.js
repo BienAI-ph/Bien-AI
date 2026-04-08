@@ -103,63 +103,90 @@ if (document.getElementById('startJourneyBtn')) {
         if (name.length > 1) {
             userNickname = name;
             localStorage.setItem('bien_user_nickname', name);
+// --- APP STATE ---
+let currentStep = 0;
+let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
+let completedCourses = JSON.parse(localStorage.getItem('bien_completed_courses')) || [];
+let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
+let userNickname = localStorage.getItem('bien_user_nickname'); 
+let chatMessages = [];
+
+// --- DOM ELEMENTS ---
+const app = document.getElementById('app');
+const splash = document.getElementById('splash');
+const nicknameModal = document.getElementById('nicknameModal');
+const mainHeader = document.getElementById('mainHeader');
+const startJourneyBtn = document.getElementById('startJourneyBtn');
+
+// --- INITIALIZATION ---
+function initApp() {
+    setTimeout(() => {
+        // Force hide splash gamit ang style para sigurado
+        if (splash) {
+            splash.style.display = 'none';
+        }
+        
+        if (!userNickname || userNickname === "Freelancer") {
+            if (nicknameModal) nicknameModal.classList.remove('hidden');
+        } else {
+            if (app) app.classList.remove('hidden');
+            if (mainHeader) mainHeader.classList.remove('hidden');
+            const nameLabel = document.getElementById('userNameLabel');
+            if (nameLabel) nameLabel.innerText = userNickname;
             
-            nicknameModal.classList.add('hidden');
-            app.classList.remove('hidden');
-            mainHeader.classList.remove('hidden');
-            document.getElementById('userNameLabel').innerText = name;
+            if (localStorage.getItem('bien_onboarding_done')) {
+                if (typeof showDashboard === "function") showDashboard();
+            } else {
+                if (typeof renderStep === "function") renderStep();
+            }
+        }
+    }, 2500);
+}
 
-            // Save to Firebase Win Community
+// Patakbuhin ang init kapag ready na ang lahat
+window.onload = initApp;
+
+// --- MODAL CLICK HANDLER (ISANG BESES LANG DAPAT ITO) ---
+if (startJourneyBtn) {
+    startJourneyBtn.onclick = async () => {
+        const input = document.getElementById('userInputName');
+        if (!input) return;
+        
+        const name = input.value.trim().toUpperCase();
+
+        if (name.length > 1) {
+            userNickname = name;
+            localStorage.setItem('bien_user_nickname', name);
+            
+            // UI Updates
+            if (nicknameModal) nicknameModal.classList.add('hidden');
+            if (app) app.classList.remove('hidden');
+            if (mainHeader) mainHeader.classList.remove('hidden');
+            const nameLabel = document.getElementById('userNameLabel');
+            if (nameLabel) nameLabel.innerText = name;
+
+            // Firebase Registration - Win Community
             try {
-                const { doc, setDoc } = window.fb;
-                await setDoc(doc(window.db, "users", name), {
-                    name: name,
-                    level: userLevel,
-                    joinedAt: new Date()
-                });
-            } catch (e) { console.error("Firebase Error:", e); }
+                if (window.fb && window.db) {
+                    const { doc, setDoc } = window.fb;
+                    await setDoc(doc(window.db, "users", name), {
+                        name: name,
+                        level: userLevel,
+                        joinedAt: new Date(),
+                        status: "Early Access Tester"
+                    });
+                    console.log("Registered to Firestore: " + name);
+                }
+            } catch (e) {
+                console.error("Firebase Sync Error (Skipped):", e);
+            }
 
-            renderStep();
+            if (typeof renderStep === "function") renderStep();
         } else {
             alert("Paps, nickname lang para makilala ka ni Bien AI!");
         }
-    });
+    };
 }
-
-// --- NICKNAME MODAL LOGIC ---
-document.getElementById('startJourneyBtn').addEventListener('click', async () => {
-    const input = document.getElementById('userInputName');
-    const name = input.value.trim().toUpperCase();
-
-    if (name.length > 1) {
-        userNickname = name;
-        localStorage.setItem('bien_user_nickname', name);
-        
-        // UI Updates
-        nicknameModal.classList.add('hidden');
-        app.classList.remove('hidden');
-        document.getElementById('userNameLabel').innerText = name;
-
-        // Firebase "Win Community" Registration
-        const { doc, setDoc } = window.fb;
-        try {
-            await setDoc(doc(window.db, "users", name), {
-                name: name,
-                level: userLevel,
-                exp: 0,
-                joinedAt: new Date(),
-                status: "Early Access Tester"
-            });
-            console.log("Welcome sa community, " + name);
-        } catch (e) {
-            console.error("Firebase Error:", e);
-        }
-
-        renderStep();
-    } else {
-        alert("Paps, kahit nickname lang para hindi tayo anonymous!");
-    }
-});
 
 // --- RENDERERS ---
 function renderStep() {
