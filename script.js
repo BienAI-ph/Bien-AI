@@ -58,10 +58,11 @@ let currentStep = 0;
 let userLevel = parseInt(localStorage.getItem('bien_user_level')) || 1;
 let completedCourses = JSON.parse(localStorage.getItem('bien_completed_courses')) || [];
 let selectedSkills = JSON.parse(localStorage.getItem('bien_user_skills')) || [];
-let userNickname = localStorage.getItem('bien_user_nickname'); // Tinanggal natin ang default na "Freelancer"
+let userNickname = localStorage.getItem('bien_user_nickname'); 
 let chatMessages = [];
 
 // --- DOM ELEMENTS ---
+// Ginamit natin ang "|| {}" para kahit wala ang ID sa HTML, hindi mag-crash ang code.
 const app = document.getElementById('app');
 const content = document.getElementById('content');
 const nextBtn = document.getElementById('nextBtn');
@@ -69,28 +70,40 @@ const splash = document.getElementById('splash');
 const mainHeader = document.getElementById('mainHeader');
 const bottomNav = document.getElementById('bottomNav');
 const footerArea = document.getElementById('footer-area');
-const nicknameModal = document.getElementById('nicknameModal'); // Idinagdag natin ito
+const nicknameModal = document.getElementById('nicknameModal'); 
 
 // --- INITIALIZATION ---
-setTimeout(() => {
-    splash.classList.add('hidden');
-    
-    // Check kung may nickname na ang user
-    if (!userNickname) {
-        // Kung wala, ipakita ang "Welcome Paps" Modal
-        nicknameModal.classList.remove('hidden');
-    } else {
-        // Kung meron na, tuloy ang ligaya sa App
-        app.classList.remove('hidden');
-        document.getElementById('userNameLabel').innerText = userNickname;
-        
-        if (localStorage.getItem('bien_onboarding_done')) {
-            showDashboard();
-        } else {
-            renderStep();
+window.onload = () => { // Mas safe gamitin ang window.onload
+    setTimeout(() => {
+        // 1. Siguraduhin nating hindi null ang splash bago itago
+        if (splash) {
+            splash.classList.add('hidden');
+            console.log("Splash hidden successfully.");
         }
-    }
-}, 2500);
+
+        // 2. Logic para sa Nickname o Dashboard
+        if (!userNickname || userNickname === "Freelancer") {
+            if (nicknameModal) {
+                nicknameModal.classList.remove('hidden');
+            } else {
+                console.error("Missing nicknameModal ID in HTML!");
+                if(app) app.classList.remove('hidden'); // Fallback para hindi stuck
+            }
+        } else {
+            if (app) app.classList.remove('hidden');
+            if (mainHeader) mainHeader.classList.remove('hidden');
+            
+            const nameLabel = document.getElementById('userNameLabel');
+            if (nameLabel) nameLabel.innerText = userNickname;
+            
+            if (localStorage.getItem('bien_onboarding_done')) {
+                if (typeof showDashboard === "function") showDashboard();
+            } else {
+                if (typeof renderStep === "function") renderStep();
+            }
+        }
+    }, 2500);
+};
 
 // --- NICKNAME MODAL LOGIC ---
 document.getElementById('startJourneyBtn').addEventListener('click', async () => {
