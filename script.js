@@ -206,57 +206,38 @@ if (startBtn) {
 }
 
 window.switchTab = function(tab) {
-    const contentArea = document.getElementById('content'); // Siguraduhin na tumutugma sa HTML
+    const content = document.getElementById('content');
     
-    // 1. I-reset ang visual ng navigation
+    // UI Update: Icons
     document.querySelectorAll('#bottomNav button').forEach(btn => {
         btn.classList.remove('text-yellow-400');
         btn.classList.add('text-zinc-500');
     });
-
     const activeBtn = document.getElementById(`nav-${tab}`);
-    if (activeBtn) activeBtn.classList.add('text-yellow-400');
+    if (activeBtn) activeBtn.classList.replace('text-zinc-500', 'text-yellow-400');
 
-    // 2. I-load ang bawat Section base sa pinindot
+    // Content Update
     if (tab === 'program') {
-        renderStep(); // Ito yung magbabalik ng onboarding/journey mo
-    } 
-    else if (tab === 'course') {
-        contentArea.innerHTML = `
-            <div class="fade-in">
-                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">Available Courses</h2>
-                <div class="grid gap-4">
-                    <div class="p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
-                        <p class="font-bold">VA Fundamentals</p>
-                        <span class="text-xs text-zinc-500">Lvl 1 Required</span>
-                    </div>
-                </div>
-            </div>`;
-    } 
-    else if (tab === 'tools') {
-        contentArea.innerHTML = `
-            <div class="fade-in">
-                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">VA Toolkit</h2>
-                <p class="text-zinc-400">Nandito ang mga kagamitan para sa iyong VA journey.</p>
-            </div>`;
-    } 
-    else if (tab === 'chats') {
-        contentArea.innerHTML = `
-            <div class="fade-in">
-                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">Bien AI Chat</h2>
-                <div class="h-64 flex items-center justify-center text-zinc-600 italic text-sm">
-                    Simulan ang pakikipag-usap...
-                </div>
-            </div>`;
+        showDashboard();
+    } else if (tab === 'course') {
+        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">VA Courses</h2>
+                             <div class="mt-4 p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-sm text-zinc-400 text-center italic">Loading latest courses...</div>`;
+    } else if (tab === 'tools') {
+        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Digital Toolkit</h2>
+                             <div class="mt-4 grid grid-cols-2 gap-4">
+                                <div class="p-4 bg-zinc-900 rounded-xl text-center border border-zinc-800 text-xs">AI Chatbot</div>
+                                <div class="p-4 bg-zinc-900 rounded-xl text-center border border-zinc-800 text-xs">PDF Editor</div>
+                             </div>`;
+    } else if (tab === 'chats') {
+        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase tracking-tighter">Bien AI Assistant</h2>
+                             <div class="mt-4 p-6 bg-yellow-400/5 border border-yellow-400/20 rounded-3xl text-zinc-400 text-center text-xs">
+                                Hi Paps! Ask me anything about Virtual Assistance.
+                             </div>`;
+    } else if (tab === 'settings') {
+        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Settings</h2>
+                             <button onclick="localStorage.clear(); location.reload();" class="mt-6 w-full py-4 bg-red-900/10 border border-red-900/30 text-red-500 rounded-2xl font-bold text-xs uppercase">Reset Progress</button>`;
     }
-    else if (tab === 'settings') {
-        contentArea.innerHTML = `
-            <div class="fade-in">
-                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">Settings</h2>
-                <button onclick="localStorage.clear(); location.reload();" class="w-full p-4 bg-red-900/20 text-red-500 rounded-xl border border-red-900/30 font-bold uppercase text-xs">Reset All Data</button>
-            </div>`;
-    }
-}
+};
 
 // --- TABS & NAVIGATION ---
 function switchTab(tab) {
