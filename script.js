@@ -144,36 +144,56 @@ if (startBtn) {
     };
 }
 
-// 1. Siguraduhin na ang switchTab ay naglalagay ng content paps
 window.switchTab = function(tab) {
-    const contentArea = document.getElementById('content');
+    const contentArea = document.getElementById('content'); // Siguraduhin na tumutugma sa HTML
     
-    // I-reset ang kulay ng lahat ng buttons sa baba
+    // 1. I-reset ang visual ng navigation
     document.querySelectorAll('#bottomNav button').forEach(btn => {
         btn.classList.remove('text-yellow-400');
         btn.classList.add('text-zinc-500');
     });
 
-    // I-highlight ang pinindot na button
     const activeBtn = document.getElementById(`nav-${tab}`);
-    if (activeBtn) {
-        activeBtn.classList.remove('text-zinc-500');
-        activeBtn.classList.add('text-yellow-400');
-    }
+    if (activeBtn) activeBtn.classList.add('text-yellow-400');
 
-    // Dito natin ilalagay ang "Dating Ganda" ng bawat section
+    // 2. I-load ang bawat Section base sa pinindot
     if (tab === 'program') {
+        renderStep(); // Ito yung magbabalik ng onboarding/journey mo
+    } 
+    else if (tab === 'course') {
         contentArea.innerHTML = `
             <div class="fade-in">
-                <h2 class="text-xl font-bold text-yellow-400 uppercase">Welcome, ${userNickname}!</h2>
-                <p class="text-zinc-400 mt-2">Handa ka na ba sa VA journey mo? Ipagpatuloy natin ang iyong training.</p>
-                </div>`;
-    } else if (tab === 'course') {
-        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Available Courses</h2><p class="text-zinc-500">Loading courses...</p>`;
-    } else if (tab === 'tools') {
-        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">VA Tools</h2><p class="text-zinc-500">Checking your toolkit...</p>`;
-    } else if (tab === 'chats') {
-        contentArea.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Chat with Bien AI</h2><p class="text-zinc-500">Start a conversation...</p>`;
+                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">Available Courses</h2>
+                <div class="grid gap-4">
+                    <div class="p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
+                        <p class="font-bold">VA Fundamentals</p>
+                        <span class="text-xs text-zinc-500">Lvl 1 Required</span>
+                    </div>
+                </div>
+            </div>`;
+    } 
+    else if (tab === 'tools') {
+        contentArea.innerHTML = `
+            <div class="fade-in">
+                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">VA Toolkit</h2>
+                <p class="text-zinc-400">Nandito ang mga kagamitan para sa iyong VA journey.</p>
+            </div>`;
+    } 
+    else if (tab === 'chats') {
+        contentArea.innerHTML = `
+            <div class="fade-in">
+                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">Bien AI Chat</h2>
+                <div class="h-64 flex items-center justify-center text-zinc-600 italic text-sm">
+                    Simulan ang pakikipag-usap...
+                </div>
+            </div>`;
+    }
+    else if (tab === 'settings') {
+        contentArea.innerHTML = `
+            <div class="fade-in">
+                <h2 class="text-xl font-black text-yellow-400 uppercase mb-4">Settings</h2>
+                <button onclick="localStorage.clear(); location.reload();" class="w-full p-4 bg-red-900/20 text-red-500 rounded-xl border border-red-900/30 font-bold uppercase text-xs">Reset All Data</button>
+            </div>`;
     }
 }
 
