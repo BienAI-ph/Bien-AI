@@ -155,19 +155,26 @@ window.onload = initApp;
 
 // --- 4. CORE FUNCTIONS ---
 function renderStep() {
-    const content = getEl('content');
-    if (content) {
-        content.innerHTML = `<div class="fade-in">
-            <h2 class="text-xl font-bold uppercase text-yellow-400">Welcome, ${userNickname}!</h2>
-            <p class="text-zinc-500 mt-2">Simulan na natin ang iyong VA journey.</p>
-        </div>`;
-    }
-}
+    const content = document.getElementById('content');
+    if (!content) return;
 
-function showDashboard() {
-    const content = getEl('content');
-    if (content) {
-        content.innerHTML = `<h2 class="text-xl font-black text-yellow-400 uppercase">Dashboard</h2>`;
+    // Tinitignan nito kung may tanong pa sa steps array
+    if (currentStep < steps.length) {
+        content.innerHTML = `
+            <div class="fade-in space-y-4 text-center mt-10">
+                <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Step ${currentStep + 1} of ${steps.length}</span>
+                <h2 class="text-2xl font-black text-yellow-400 uppercase tracking-tighter">${steps[currentStep].title}</h2>
+                <p class="text-zinc-400 text-sm leading-relaxed mx-auto max-w-[250px]">${steps[currentStep].desc}</p>
+            </div>
+        `;
+        // Siguraduhin nating "CONTINUE" ang nakasulat sa button
+        if (document.getElementById('nextBtn')) {
+            document.getElementById('nextBtn').innerText = "CONTINUE";
+        }
+    } else {
+        // Kapag lumampas na sa huling tanong, Dashboard na!
+        localStorage.setItem('bien_onboarding_done', 'true');
+        showDashboard();
     }
 }
 
