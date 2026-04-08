@@ -62,39 +62,25 @@ let userNickname = localStorage.getItem('bien_user_nickname');
 let chatMessages = [];
 
 // --- DOM ELEMENTS ---
-// Ginamit natin ang "|| {}" para kahit wala ang ID sa HTML, hindi mag-crash ang code.
 const app = document.getElementById('app');
-const content = document.getElementById('content');
-const nextBtn = document.getElementById('nextBtn');
 const splash = document.getElementById('splash');
+const nicknameModal = document.getElementById('nicknameModal');
 const mainHeader = document.getElementById('mainHeader');
-const bottomNav = document.getElementById('bottomNav');
-const footerArea = document.getElementById('footer-area');
-const nicknameModal = document.getElementById('nicknameModal'); 
 
 // --- INITIALIZATION ---
-window.onload = () => { // Mas safe gamitin ang window.onload
+function initApp() {
     setTimeout(() => {
-        // 1. Siguraduhin nating hindi null ang splash bago itago
-        if (splash) {
-            splash.classList.add('hidden');
-            console.log("Splash hidden successfully.");
-        }
-
-        // 2. Logic para sa Nickname o Dashboard
+        if (splash) splash.classList.add('hidden');
+        
+        // Logic kung bago o luma ang user
         if (!userNickname || userNickname === "Freelancer") {
-            if (nicknameModal) {
-                nicknameModal.classList.remove('hidden');
-            } else {
-                console.error("Missing nicknameModal ID in HTML!");
-                if(app) app.classList.remove('hidden'); // Fallback para hindi stuck
-            }
+            if (nicknameModal) nicknameModal.classList.remove('hidden');
         } else {
             if (app) app.classList.remove('hidden');
             if (mainHeader) mainHeader.classList.remove('hidden');
-            
-            const nameLabel = document.getElementById('userNameLabel');
-            if (nameLabel) nameLabel.innerText = userNickname;
+            if (document.getElementById('userNameLabel')) {
+                document.getElementById('userNameLabel').innerText = userNickname;
+            }
             
             if (localStorage.getItem('bien_onboarding_done')) {
                 if (typeof showDashboard === "function") showDashboard();
@@ -103,7 +89,42 @@ window.onload = () => { // Mas safe gamitin ang window.onload
             }
         }
     }, 2500);
-};
+}
+
+// Patakbuhin ang init
+initApp();
+
+// --- MODAL CLICK HANDLER ---
+if (document.getElementById('startJourneyBtn')) {
+    document.getElementById('startJourneyBtn').addEventListener('click', async () => {
+        const input = document.getElementById('userInputName');
+        const name = input.value.trim().toUpperCase();
+
+        if (name.length > 1) {
+            userNickname = name;
+            localStorage.setItem('bien_user_nickname', name);
+            
+            nicknameModal.classList.add('hidden');
+            app.classList.remove('hidden');
+            mainHeader.classList.remove('hidden');
+            document.getElementById('userNameLabel').innerText = name;
+
+            // Save to Firebase Win Community
+            try {
+                const { doc, setDoc } = window.fb;
+                await setDoc(doc(window.db, "users", name), {
+                    name: name,
+                    level: userLevel,
+                    joinedAt: new Date()
+                });
+            } catch (e) { console.error("Firebase Error:", e); }
+
+            renderStep();
+        } else {
+            alert("Paps, nickname lang para makilala ka ni Bien AI!");
+        }
+    });
+}
 
 // --- NICKNAME MODAL LOGIC ---
 document.getElementById('startJourneyBtn').addEventListener('click', async () => {
